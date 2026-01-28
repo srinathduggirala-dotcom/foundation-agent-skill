@@ -1,0 +1,11 @@
+{
+  "name": "foundation-agent-skill",
+  "description": "Claude Code skill for creating comprehensive foundational documents through iterative dialogue. Use before writing PRDs to document entities, systems, processes, or concepts.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Srinath Duggirala"
+  },
+  "skills": [
+    "skills/foundation"
+  ]
+}
