@@ -22,6 +22,36 @@ After installation, invoke the skill with:
 
 Or Claude will automatically suggest it when you're documenting new entities, systems, processes, or concepts.
 
+## Plan File Persistence
+
+The Foundation Agent maintains a **plan file** throughout document creation, enabling:
+
+- **State persistence** - Resume incomplete documents across sessions
+- **Context accumulation** - Corrections and clarifications are tracked
+- **Audit trail** - Decisions and thought process are logged
+
+### Plan File Location
+
+```
+~/.claude/plans/foundation-<topic-slug>.md
+```
+
+### Automatic Resumption
+
+When you invoke `/foundation`, the agent checks for incomplete documents:
+
+```
+I found an incomplete foundation document:
+- Topic: Bag Lifecycle
+- Current Phase: 4 (Outline Co-Creation)
+- Last Updated: 2026-01-28 14:30
+
+Would you like to:
+1. Resume this document
+2. Abandon and start fresh
+3. Start a different foundation document
+```
+
 ## The Process
 
 1. **Problem Understanding** - Extract domain, problem type, deliverable, audience
@@ -32,6 +62,8 @@ Or Claude will automatically suggest it when you're documenting new entities, sy
 6. **Section-by-Section Development** - Draft, review, correct, approve each section
 7. **Consistency Check** - Verify cross-references, no duplicates, complete coverage
 8. **Document Split Review** - Consider if multiple documents needed
+
+Each phase updates the plan file with summaries and advances to the next phase.
 
 ## Core Principles
 
@@ -52,6 +84,13 @@ The skill draws from established frameworks including:
 - Jobs to be Done (JTBD)
 - Architecture Decision Records (ADR)
 - And more...
+
+## Files
+
+| File | Purpose |
+|------|---------|
+| `skills/foundation/SKILL.md` | Main skill instructions |
+| `skills/foundation/plan-template.md` | Template for new plan files |
 
 ## License
 

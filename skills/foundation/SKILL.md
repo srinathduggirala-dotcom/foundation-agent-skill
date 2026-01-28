@@ -1,6 +1,7 @@
 ---
 name: foundation
 description: Create comprehensive foundational documents through iterative dialogue. Use when documenting new entities, systems, processes, or concepts before writing PRDs.
+allowed-tools: Read, Write, Glob, Grep, WebSearch
 ---
 
 # Foundation Document Agent
@@ -32,9 +33,84 @@ Given a problem statement:
 6. **Single Source of Truth**: Each concept in ONE place. Others reference, never duplicate.
 7. **Audience-First Design**: Every document/section has clear consumer.
 
+---
+
+## Plan File Protocol
+
+**MANDATORY**: Before every response, you MUST update the plan file. This enables:
+- State persistence across messages
+- Resumption of incomplete documents
+- Audit trail of decisions and corrections
+
+### Plan File Location
+
+```
+~/.claude/plans/foundation-<topic-slug>.md
+```
+
+Where `<topic-slug>` is a lowercase, hyphenated version of the document topic (e.g., `bag-lifecycle`, `collection-point-config`).
+
+### Plan File Structure
+
+The plan file has three section states:
+
+| State | Content |
+|-------|---------|
+| **Completed** | Brief summary of what happened, key decisions made |
+| **Current** | Active thought process, questions asked, awaiting input |
+| **Pending** | Full instructions for what to do (copied from this skill) |
+
+### Plan File Update Rules
+
+1. **Before responding**: Read the plan file to restore context
+2. **After each phase completion**: Replace instructions with summary, advance current phase
+3. **On user corrections**: Add to Context section in plan file
+4. **On session end**: Ensure plan file reflects exact state for resumption
+
+---
+
+## Session Start Protocol
+
+**ALWAYS execute this before any other action:**
+
+### Step 1: Check for Incomplete Documents
+
+```
+Glob: ~/.claude/plans/foundation-*.md
+```
+
+If files found:
+1. Read each file
+2. Check `Status` in metadata
+3. If `Status: in-progress`, offer resumption:
+
+```
+I found an incomplete foundation document:
+- **Topic**: [from plan file]
+- **Current Phase**: [phase number and name]
+- **Last Updated**: [timestamp]
+
+Would you like to:
+1. **Resume** this document
+2. **Abandon** and start fresh
+3. **Start a different** foundation document
+```
+
+### Step 2: For New Documents
+
+1. Create plan file at `~/.claude/plans/foundation-<topic-slug>.md`
+2. Copy full template from plan-template.md
+3. Fill in metadata (topic, started timestamp)
+4. Set Phase 1 as current
+
+---
+
 ## The Process
 
 ### Phase 1: Problem Understanding
+
+**Plan file update**: Mark Phase 1 as `current`, log questions asked.
+
 Extract from user's problem statement:
 - **Domain**: What field/industry?
 - **Problem Type**: New entity? Configuration? Process? Decision?
@@ -43,7 +119,15 @@ Extract from user's problem statement:
 
 Ask clarifying questions if unclear.
 
+**On completion**: Update plan file with summary:
+```
+**Summary**: Documenting [what] for [audience]. Domain: [domain]. Deliverable: [type].
+```
+
 ### Phase 2: Framework Research
+
+**Plan file update**: Mark Phase 2 as `current`, log search queries.
+
 Use web search to find relevant frameworks:
 - "[domain] documentation framework"
 - "[problem type] analysis template"
@@ -51,7 +135,12 @@ Use web search to find relevant frameworks:
 
 Compile 2-4 framework options.
 
+**On completion**: Update plan file with frameworks found and brief descriptions.
+
 ### Phase 3: Framework Brainstorming
+
+**Plan file update**: Mark Phase 3 as `current`, log options presented.
+
 Present options to user:
 
 ```
@@ -68,14 +157,24 @@ Based on your problem, here are frameworks that could work:
 Which resonates? Or should I search for others?
 ```
 
+**On completion**: Update plan file with chosen framework and rationale.
+
 ### Phase 4: Outline Co-Creation
+
+**Plan file update**: Mark Phase 4 as `current`, log outline iterations.
+
 Once framework chosen:
 1. Search for sample templates
 2. Adapt to user's problem
 3. Propose outline for validation
 4. Iterate until approved
 
+**On completion**: Update plan file with approved outline.
+
 ### Phase 5: ID Scheme Agreement
+
+**Plan file update**: Mark Phase 5 as `current`, log proposed schemes.
+
 Propose ID conventions based on artifacts:
 
 ```
@@ -86,16 +185,35 @@ For this document, I suggest:
 Does this work?
 ```
 
+**On completion**: Update plan file with agreed ID scheme.
+
 ### Phase 6: Section-by-Section Development
+
+**Plan file update**: Mark Phase 6 as `current`, track which section is active.
+
 For each section:
 1. Draft content
 2. Present for review
 3. Ask questions if unclear
 4. Get corrections
-5. Update Context
+5. Update Context (in plan file)
 6. Revise and get approval
 
+**Plan file tracking**:
+```
+### Sections Progress
+- [x] Section 1: Overview - Approved
+- [x] Section 2: States - Approved with corrections (see Context)
+- [ ] Section 3: Actions - IN PROGRESS
+- [ ] Section 4: Rules - Pending
+```
+
+**On completion**: Update plan file with section summaries.
+
 ### Phase 7: Consistency Check
+
+**Plan file update**: Mark Phase 7 as `current`, log check results.
+
 After all sections:
 1. Contradiction check
 2. ID consistency (all referenced IDs exist)
@@ -104,7 +222,12 @@ After all sections:
 5. Single source check
 6. Coverage check
 
+**On completion**: Update plan file with issues found and resolutions.
+
 ### Phase 8: Document Split Review
+
+**Plan file update**: Mark Phase 8 as `current`, log split decision.
+
 Consider if split needed:
 
 | Question | If Yes |
@@ -114,6 +237,13 @@ Consider if split needed:
 | Complex rules dominate? | Extract rules doc |
 
 **Splitting is NOT required.** Prefer single doc unless complexity demands split.
+
+**On completion**:
+1. Update plan file status to `complete`
+2. Record final document path(s)
+3. Add completion timestamp
+
+---
 
 ## Reference Frameworks (Starting Points)
 
@@ -202,6 +332,8 @@ When new context emerges after document finalization:
 
 ## Starting
 
+**FIRST**: Execute Session Start Protocol (check for incomplete documents).
+
 **New Document?**
 I need:
 1. **What** are we documenting? (entity, process, system, decision)
@@ -219,6 +351,7 @@ Tell me:
 I'll classify the context and propose an approach.
 
 ## Quality Checklist
+- [ ] Plan file created and maintained throughout
 - [ ] Framework choice documented with rationale
 - [ ] Outline approved by user
 - [ ] ID scheme agreed upon
@@ -230,3 +363,105 @@ I'll classify the context and propose an approach.
 - [ ] Consistency check complete
 - [ ] Quick Reference tables present
 - [ ] Change Log (if document evolved)
+- [ ] Plan file marked complete with final document path
+
+---
+
+## Plan File Template
+
+Use this template when creating a new plan file:
+
+```markdown
+# Foundation Document Plan: <Topic>
+
+## Metadata
+- **Topic**: <human-readable topic name>
+- **Status**: in-progress
+- **Current Phase**: 1
+- **Started**: <YYYY-MM-DD HH:MM>
+- **Last Updated**: <YYYY-MM-DD HH:MM>
+- **Document Path**: <TBD - where final doc will be saved>
+
+---
+
+## Context Accumulated
+<!-- Add corrections and clarifications here as they emerge -->
+
+---
+
+## Phase 1: Problem Understanding
+### Status: current
+
+**Instructions**:
+Extract domain, problem type, deliverable, and audience from user's problem statement. Ask clarifying questions if unclear.
+
+**Thought Process**:
+<!-- Log questions asked, answers received -->
+
+---
+
+## Phase 2: Framework Research
+### Status: pending
+
+**Instructions**:
+Search for 2-4 relevant frameworks using web search. Document search queries and findings.
+
+---
+
+## Phase 3: Framework Brainstorming
+### Status: pending
+
+**Instructions**:
+Present framework options to user. Get selection and rationale.
+
+---
+
+## Phase 4: Outline Co-Creation
+### Status: pending
+
+**Instructions**:
+Adapt chosen framework to user's problem. Propose outline, iterate until approved.
+
+---
+
+## Phase 5: ID Scheme Agreement
+### Status: pending
+
+**Instructions**:
+Propose ID conventions based on document artifacts. Get user agreement.
+
+---
+
+## Phase 6: Section-by-Section Development
+### Status: pending
+
+**Instructions**:
+For each section: draft, review, correct, approve. Track progress below.
+
+### Sections Progress
+<!-- Will be populated when Phase 6 begins -->
+
+---
+
+## Phase 7: Consistency Check
+### Status: pending
+
+**Instructions**:
+Run all consistency checks: contradictions, ID references, cross-references, audience clarity, single source, coverage.
+
+---
+
+## Phase 8: Document Split Review
+### Status: pending
+
+**Instructions**:
+Evaluate if document should be split. Make recommendation, get user decision.
+
+---
+
+## Completion
+<!-- Populated when document is complete -->
+- **Completed**: <timestamp>
+- **Final Document(s)**: <path(s)>
+- **Summary**: <brief description of what was created>
+```
