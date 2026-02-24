@@ -22,35 +22,30 @@ After installation, invoke the skill with:
 
 Or Claude will automatically suggest it when you're documenting new entities, systems, processes, or concepts.
 
-## Plan File Persistence
+## Key Behaviors
 
-The Foundation Agent maintains a **plan file** throughout document creation, enabling:
+### Interactive Dialogue via AskUserQuestion
+
+The agent **always** uses the `AskUserQuestion` tool for user interactions — never outputs questions as plain text. This ensures proper interactive prompts at every decision point: framework selection, outline approval, section review, and more.
+
+### Plan File in Working Folder
+
+The agent maintains a **plan file** in your working directory (not in `~/.claude/plans/`), keeping the plan co-located with the documents it tracks.
+
+```
+<your-working-folder>/foundation-plan-<topic-slug>.md
+```
+
+This enables:
 
 - **State persistence** - Resume incomplete documents across sessions
 - **Context accumulation** - Corrections and clarifications are tracked
 - **Audit trail** - Decisions and thought process are logged
-
-### Plan File Location
-
-```
-~/.claude/plans/foundation-<topic-slug>.md
-```
+- **Visibility** - Plan is visible in your project directory
 
 ### Automatic Resumption
 
-When you invoke `/foundation`, the agent checks for incomplete documents:
-
-```
-I found an incomplete foundation document:
-- Topic: Bag Lifecycle
-- Current Phase: 4 (Outline Co-Creation)
-- Last Updated: 2026-01-28 14:30
-
-Would you like to:
-1. Resume this document
-2. Abandon and start fresh
-3. Start a different foundation document
-```
+When you invoke `/foundation`, the agent checks the working folder for incomplete documents and asks whether to resume.
 
 ## The Process
 
@@ -69,7 +64,7 @@ Each phase updates the plan file with summaries and advances to the next phase.
 
 - **Progressive Elaboration**: One section at a time with approval gates
 - **Context Accumulation**: Growing context from corrections
-- **Never Assume**: Ask when unclear
+- **Never Assume**: Ask when unclear (via AskUserQuestion)
 - **Consistency Enforcement**: Quick checks + thorough final review
 - **Dual Readability**: Human names + machine IDs (e.g., "Payment Method (P1)")
 - **Single Source of Truth**: Each concept defined once, referenced elsewhere

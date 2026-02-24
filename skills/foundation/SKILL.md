@@ -1,7 +1,7 @@
 ---
 name: foundation
 description: Create comprehensive foundational documents through iterative dialogue. Use when documenting new entities, systems, processes, or concepts before writing PRDs.
-allowed-tools: Read, Write, Glob, Grep, WebSearch
+allowed-tools: Read, Write, Edit, Glob, Grep, WebSearch, WebFetch, AskUserQuestion
 ---
 
 # Foundation Document Agent
@@ -23,11 +23,35 @@ Given a problem statement:
 6. Check for consistency
 7. Produce documents ready for PRD derivation and developer handoff
 
+## CRITICAL RULES — READ FIRST
+
+### Rule 1: ALWAYS Use AskUserQuestion Tool
+
+**NEVER output questions as plain text.** Every time you need user input — clarifying questions, approvals, framework selection, section review, corrections — you MUST use the `AskUserQuestion` tool. This is non-negotiable.
+
+Examples of when to use AskUserQuestion:
+- Phase 1: Asking about domain, problem type, deliverable, audience
+- Phase 3: Presenting framework options and asking which to use
+- Phase 4: Presenting outline and asking for approval
+- Phase 5: Proposing ID scheme and asking for agreement
+- Phase 6: Presenting a drafted section for review
+- Phase 7: Presenting consistency issues for resolution
+- Phase 8: Asking about document split decisions
+- ANY time you need clarification, confirmation, or a choice from the user
+
+**Do NOT** just write "What do you think?" in your response. Instead, call `AskUserQuestion` with a clear, structured question. This ensures the user gets a proper interactive prompt and the conversation doesn't move forward without their input.
+
+### Rule 2: ALWAYS Write the Plan File in the Working Folder
+
+The plan file MUST be written in the **same folder where the foundation document is being created** — NOT in `~/.claude/plans/`. This keeps the plan co-located with the work and visible in the project directory.
+
+---
+
 ## Core Principles
 
 1. **Progressive Elaboration**: One section at a time. Get approval before proceeding.
 2. **Context Accumulation**: Maintain growing Context section. Update on every correction.
-3. **Never Assume**: If context missing, ask. If multiple interpretations, ask.
+3. **Never Assume**: If context missing, ask using AskUserQuestion. If multiple interpretations, ask using AskUserQuestion.
 4. **Consistency Enforcement**: Quick check after each section. Thorough check at end.
 5. **Dual Readability**: Human names + machine IDs everywhere (e.g., "Payment Method (P1)")
 6. **Single Source of Truth**: Each concept in ONE place. Others reference, never duplicate.
@@ -44,11 +68,15 @@ Given a problem statement:
 
 ### Plan File Location
 
+The plan file lives **in the working folder** — the same directory where the foundation document will be written.
+
 ```
-~/.claude/plans/foundation-<topic-slug>.md
+<working-folder>/foundation-plan-<topic-slug>.md
 ```
 
-Where `<topic-slug>` is a lowercase, hyphenated version of the document topic (e.g., `bag-lifecycle`, `collection-point-config`).
+Where `<working-folder>` is the directory the user is working in (determined at session start), and `<topic-slug>` is a lowercase, hyphenated version of the document topic (e.g., `bag-lifecycle`, `collection-point-config`).
+
+**Why the working folder?** The plan is a project artifact. It belongs next to the documents it tracks, visible in the project tree, not hidden in a global config directory.
 
 ### Plan File Structure
 
@@ -73,16 +101,20 @@ The plan file has three section states:
 
 **ALWAYS execute this before any other action:**
 
-### Step 1: Check for Incomplete Documents
+### Step 1: Determine the Working Folder
+
+The working folder is the directory the user is currently in (their cwd). All plan files and documents will be created here.
+
+### Step 2: Check for Incomplete Documents
 
 ```
-Glob: ~/.claude/plans/foundation-*.md
+Glob: <working-folder>/foundation-plan-*.md
 ```
 
 If files found:
 1. Read each file
 2. Check `Status` in metadata
-3. If `Status: in-progress`, offer resumption:
+3. If `Status: in-progress`, use **AskUserQuestion** to offer resumption:
 
 ```
 I found an incomplete foundation document:
@@ -96,9 +128,9 @@ Would you like to:
 3. **Start a different** foundation document
 ```
 
-### Step 2: For New Documents
+### Step 3: For New Documents
 
-1. Create plan file at `~/.claude/plans/foundation-<topic-slug>.md`
+1. Create plan file at `<working-folder>/foundation-plan-<topic-slug>.md`
 2. Copy full template from plan-template.md
 3. Fill in metadata (topic, started timestamp)
 4. Set Phase 1 as current
@@ -117,7 +149,7 @@ Extract from user's problem statement:
 - **Deliverable**: Reference doc? PRD-ready spec? Decision record?
 - **Audience**: Developers? PM? Ops? All?
 
-Ask clarifying questions if unclear.
+**Use AskUserQuestion** for any clarifying questions. Do not proceed until you have clear answers for all four items above.
 
 **On completion**: Update plan file with summary:
 ```
@@ -141,7 +173,7 @@ Compile 2-4 framework options.
 
 **Plan file update**: Mark Phase 3 as `current`, log options presented.
 
-Present options to user:
+Present options to user via **AskUserQuestion**:
 
 ```
 Based on your problem, here are frameworks that could work:
@@ -166,8 +198,8 @@ Which resonates? Or should I search for others?
 Once framework chosen:
 1. Search for sample templates
 2. Adapt to user's problem
-3. Propose outline for validation
-4. Iterate until approved
+3. Propose outline for validation via **AskUserQuestion**
+4. Iterate until approved (each iteration uses **AskUserQuestion**)
 
 **On completion**: Update plan file with approved outline.
 
@@ -175,7 +207,7 @@ Once framework chosen:
 
 **Plan file update**: Mark Phase 5 as `current`, log proposed schemes.
 
-Propose ID conventions based on artifacts:
+Propose ID conventions based on artifacts via **AskUserQuestion**:
 
 ```
 For this document, I suggest:
@@ -193,11 +225,11 @@ Does this work?
 
 For each section:
 1. Draft content
-2. Present for review
-3. Ask questions if unclear
+2. Present draft and use **AskUserQuestion** to get review feedback
+3. Use **AskUserQuestion** for any clarifying questions
 4. Get corrections
 5. Update Context (in plan file)
-6. Revise and get approval
+6. Revise and use **AskUserQuestion** to get final approval before moving on
 
 **Plan file tracking**:
 ```
@@ -332,23 +364,23 @@ When new context emerges after document finalization:
 
 ## Starting
 
-**FIRST**: Execute Session Start Protocol (check for incomplete documents).
+**FIRST**: Execute Session Start Protocol (check for incomplete documents in the working folder).
 
 **New Document?**
-I need:
+Use **AskUserQuestion** to gather:
 1. **What** are we documenting? (entity, process, system, decision)
 2. **Why** does it need documentation? (new system, clarify existing, prepare for PRDs)
 3. **Who** will consume this? (developers, PM, ops, all)
 4. **What domain** is this in? (e-commerce, healthcare, logistics, etc.)
 
-I'll then research relevant frameworks and propose options.
+Then research relevant frameworks and propose options.
 
 **Updating Existing Document?**
-Tell me:
+Use **AskUserQuestion** to gather:
 1. Which document(s) are we updating?
 2. What new context have you discovered?
 
-I'll classify the context and propose an approach.
+Then classify the context and propose an approach.
 
 ## Quality Checklist
 - [ ] Plan file created and maintained throughout
@@ -369,7 +401,7 @@ I'll classify the context and propose an approach.
 
 ## Plan File Template
 
-Use this template when creating a new plan file:
+Use this template when creating a new plan file. Save it as `foundation-plan-<topic-slug>.md` in the working folder.
 
 ```markdown
 # Foundation Document Plan: <Topic>
@@ -380,6 +412,7 @@ Use this template when creating a new plan file:
 - **Current Phase**: 1
 - **Started**: <YYYY-MM-DD HH:MM>
 - **Last Updated**: <YYYY-MM-DD HH:MM>
+- **Working Folder**: <absolute path to working directory>
 - **Document Path**: <TBD - where final doc will be saved>
 
 ---

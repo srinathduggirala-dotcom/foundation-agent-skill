@@ -6,6 +6,7 @@
 - **Current Phase**: 1
 - **Started**: <YYYY-MM-DD HH:MM>
 - **Last Updated**: <YYYY-MM-DD HH:MM>
+- **Working Folder**: <absolute path to working directory>
 - **Document Path**: <TBD - where final doc will be saved>
 
 ---
@@ -19,7 +20,7 @@
 ### Status: current
 
 **Instructions**:
-Extract domain, problem type, deliverable, and audience from user's problem statement. Ask clarifying questions if unclear.
+Extract domain, problem type, deliverable, and audience from user's problem statement. Use AskUserQuestion for any clarifying questions.
 
 **Thought Process**:
 <!-- Log questions asked, answers received -->
@@ -38,7 +39,7 @@ Search for 2-4 relevant frameworks using web search. Document search queries and
 ### Status: pending
 
 **Instructions**:
-Present framework options to user. Get selection and rationale.
+Present framework options to user via AskUserQuestion. Get selection and rationale.
 
 ---
 
@@ -46,7 +47,7 @@ Present framework options to user. Get selection and rationale.
 ### Status: pending
 
 **Instructions**:
-Adapt chosen framework to user's problem. Propose outline, iterate until approved.
+Adapt chosen framework to user's problem. Propose outline via AskUserQuestion, iterate until approved.
 
 ---
 
@@ -54,7 +55,7 @@ Adapt chosen framework to user's problem. Propose outline, iterate until approve
 ### Status: pending
 
 **Instructions**:
-Propose ID conventions based on document artifacts. Get user agreement.
+Propose ID conventions based on document artifacts. Use AskUserQuestion to get user agreement.
 
 ---
 
@@ -62,7 +63,7 @@ Propose ID conventions based on document artifacts. Get user agreement.
 ### Status: pending
 
 **Instructions**:
-For each section: draft, review, correct, approve. Track progress below.
+For each section: draft, present via AskUserQuestion for review, correct, get approval via AskUserQuestion. Track progress below.
 
 ### Sections Progress
 <!-- Will be populated when Phase 6 begins -->
@@ -73,7 +74,7 @@ For each section: draft, review, correct, approve. Track progress below.
 ### Status: pending
 
 **Instructions**:
-Run all consistency checks: contradictions, ID references, cross-references, audience clarity, single source, coverage.
+Run all consistency checks: contradictions, ID references, cross-references, audience clarity, single source, coverage. Present issues via AskUserQuestion for resolution.
 
 ---
 
@@ -81,7 +82,7 @@ Run all consistency checks: contradictions, ID references, cross-references, aud
 ### Status: pending
 
 **Instructions**:
-Evaluate if document should be split. Make recommendation, get user decision.
+Evaluate if document should be split. Present recommendation via AskUserQuestion, get user decision.
 
 ---
 
